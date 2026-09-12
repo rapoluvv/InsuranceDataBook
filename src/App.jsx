@@ -491,6 +491,7 @@ function validateStep(stepIndex, form) {
     required('planName', 'Add a plan name / term.');
     required('sumAssured', 'Add the sum assured.');
     required('premium', 'Add the premium.');
+    required('premiumMode', 'Choose a premium mode.');
     if (form.datingBack === 'Yes' && !String(form.datingBackDate || '').trim()) {
       errors.datingBackDate = 'Add the dating back date.';
     }
@@ -1502,7 +1503,12 @@ function RecordsView({
               </button>
               <div className="record-plan">
                 <strong>{record.planName || 'Plan not selected'}</strong>
-                <small>{formatMoney(record.premium)} / year · {formatMoney(record.sumAssured)} cover</small>
+                <small>
+                  {formatMoney(record.premium)}
+                  {record.formData?.premiumMode ? ` / ${record.formData.premiumMode}` : ''}
+                  {' · '}
+                  {formatMoney(record.sumAssured)} cover
+                </small>
               </div>
               <div className="record-doc">
                 {docDate ? (
@@ -1720,7 +1726,7 @@ function FormView({
                   <Field label="Policy No" name="planNumber" onChange={onChange} placeholder="Policy number if available" value={form.planNumber} />
                   <Field label="Policy Term (Years)" name="policyTerm" onChange={onChange} placeholder="Years" type="number" value={form.policyTerm} />
                   <Field label="PPT (Premium Paying Term)" name="ppt" onChange={onChange} placeholder="Years" type="number" value={form.ppt} />
-                  <SelectField label="Premium Mode" name="premiumMode" onChange={onChange} options={['Yearly', 'Half-Yearly', 'Quarterly', 'NACH', 'Monthly', 'Single']} value={form.premiumMode} />
+                  <SelectField error={fieldErrors.premiumMode} label="Premium Mode" name="premiumMode" onChange={onChange} options={['Yearly', 'Half-Yearly', 'Quarterly', 'NACH', 'Monthly', 'Single']} required value={form.premiumMode} />
                   <Field error={fieldErrors.sumAssured} label="Sum Assured (₹)" name="sumAssured" onChange={onChange} placeholder="₹ 0" required type="number" value={form.sumAssured} />
                   <Field error={fieldErrors.premium} label="Premium (₹)" name="premium" onChange={onChange} placeholder="₹ 0" required type="number" value={form.premium} />
                   <SelectField label="Accidental Benefit" name="accidentalBenefit" onChange={onChange} options={['None', 'AB', 'ADDB']} value={form.accidentalBenefit} />
