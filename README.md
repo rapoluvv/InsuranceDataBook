@@ -66,6 +66,8 @@ Google sign-in uses Firebase's popup flow. Make sure your development and produc
 
 The login page also includes **Create an account** for Email/Password users. Google creates a Firebase account automatically the first time a new Google user completes the popup flow. New accounts are customers by default; assign the agent claim separately for staff accounts.
 
+Authentication uses Firebase's browser-session persistence. A registered user is signed out when the browser tab or window session ends, rather than being restored after a later browser launch. This does not delete the Firebase account or any saved records; the user can sign in again normally.
+
 Agents can use **Share customer link** on the overview screen to open the device share menu on supported mobile browsers (WhatsApp, Messages, email, etc.). Desktop browsers without the Web Share API copy the invite URL instead. Opening that URL automatically creates a Firebase anonymous guest session and opens the intake form. The link is an onboarding shortcut, not an access-control token; Firestore Rules still enforce ownership, and the submitted record includes the inviting agent metadata when present. Customers with zero records also open directly into a new intake after signing in.
 
 After an invited customer submits successfully, the invite query parameters are removed from the browser URL and the app returns to its normal records route.
