@@ -1,5 +1,5 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { browserLocalPersistence, getAuth, setPersistence } from 'firebase/auth';
+import { browserSessionPersistence, getAuth, setPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -21,7 +21,7 @@ let authPersistenceReady = Promise.resolve();
 if (hasFirebaseConfig) {
   app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
   auth = getAuth(app);
-  authPersistenceReady = setPersistence(auth, browserLocalPersistence);
+  authPersistenceReady = setPersistence(auth, browserSessionPersistence);
   db = getFirestore(app);
 }
 
