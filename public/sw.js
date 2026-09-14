@@ -5,8 +5,11 @@ const APP_SHELL_URL = new URL('index.html', self.registration.scope).toString();
 
 const isCacheableResponse = (response) => response && response.ok && response.type === 'basic';
 
-self.addEventListener('install', () => {
+self.addEventListener('install', (event) => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.add(APP_SHELL_URL)),
+  );
 });
 
 self.addEventListener('activate', (event) => {
@@ -33,17 +36,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (request.mode === 'navigate' || request.destination === 'document') {
+  const acceptsHtml = request.headers.get('accept')?.includes('text/html');
+  if (request.mode === 'navigate' || request.destination === 'document' || acceptsHtml) {
     event.respondWith(
-      fetch(request).then((response) => {
-        if (isCacheableResponse(response)) {
-          const responseForCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseForCache));
+      fetch(request).then(async (response) => {
+        if (response.ok) {
+          caches.open(CACHE_NAME).then((cache) => cache.add(APP_SHELL_URL)).catch(() => {});
+          return response;
         }
-        return response;
+
+        const cachedShell = await caches.match(APP_SHELL_URL);
+        return cachedShell || response;
       }).catch(async () => {
-        const cachedResponse = await caches.match(request);
-        return cachedResponse || caches.match(APP_SHELL_URL);
+        const cachedShell = await caches.match(APP_SHELL_URL);
+        return cachedShell || new Response('Offline', {
+          status: 503,
+          statusText: 'Offline',
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        });
       }),
     );
     return;
