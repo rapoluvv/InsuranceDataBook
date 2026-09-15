@@ -404,6 +404,15 @@ function getDateTimestamp(value) {
   return Number.isNaN(timestamp) ? null : timestamp;
 }
 
+function getRecordPolicyNumber(record) {
+  const policyNumber = record.policyNumber
+    || record.formData?.policyNumber
+    || record.formData?.previousPolicies?.find((policy) => policy?.policyNumber)?.policyNumber
+    || record.previousPolicies?.find((policy) => policy?.policyNumber)?.policyNumber
+    || '';
+  return String(policyNumber).trim();
+}
+
 function getImportOrder(record) {
   return Number.isInteger(record.importOrder) ? record.importOrder : Number.MAX_SAFE_INTEGER;
 }
@@ -1152,7 +1161,7 @@ function RecordsView({
   const filteredRecords = useMemo(() => {
     const query = search.trim().toLowerCase();
     const matched = records.filter((record) => {
-      const docVal = record.formData?.commencementDate || record.formData?.doc || record.commencementDate || '';
+      const policyNumber = getRecordPolicyNumber(record);
       const matchesSearch = !query || [
         record.caseNumber,
         record.id,
@@ -1161,7 +1170,7 @@ function RecordsView({
         record.ownerName,
         record.submittedByName,
         record.submittedByEmail,
-        docVal,
+        policyNumber,
       ]
         .filter(Boolean)
         .some((value) => value.toLowerCase().includes(query));
@@ -1192,13 +1201,10 @@ function RecordsView({
           bVal = bSubmittedAt;
           break;
         }
-        case 'doc': {
-          const aDoc = a.formData?.commencementDate || a.formData?.doc || a.commencementDate || '';
-          const bDoc = b.formData?.commencementDate || b.formData?.doc || b.commencementDate || '';
-          aVal = aDoc ? new Date(aDoc).getTime() : 0;
-          bVal = bDoc ? new Date(bDoc).getTime() : 0;
+        case 'policyNumber':
+          aVal = getRecordPolicyNumber(a).toLowerCase();
+          bVal = getRecordPolicyNumber(b).toLowerCase();
           break;
-        }
         case 'applicant':
           aVal = (a.applicantName || '').toLowerCase();
           bVal = (b.applicantName || '').toLowerCase();
@@ -1286,7 +1292,7 @@ function RecordsView({
       setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortField(field);
-      setSortDirection(field === 'applicant' || field === 'planName' || field === 'status' ? 'asc' : 'desc');
+      setSortDirection(field === 'applicant' || field === 'planName' || field === 'policyNumber' || field === 'status' ? 'asc' : 'desc');
     }
   }
 
@@ -1347,8 +1353,8 @@ function RecordsView({
             >
               <option value="submittedAt:desc">Submitted (Newest first)</option>
               <option value="submittedAt:asc">Submitted (Oldest first)</option>
-              <option value="doc:desc">DOC (Latest first)</option>
-              <option value="doc:asc">DOC (Earliest first)</option>
+              <option value="policyNumber:asc">Policy number (A-Z)</option>
+              <option value="policyNumber:desc">Policy number (Z-A)</option>
               <option value="updatedAt:desc">Updated (Newest first)</option>
               <option value="updatedAt:asc">Updated (Oldest first)</option>
               <option value="applicant:asc">Applicant (A-Z)</option>
@@ -1437,13 +1443,13 @@ function RecordsView({
             {renderSortIcon('premium')}
           </button>
           <button
-            className={`table-head-btn ${sortField === 'doc' ? 'is-sorted' : ''}`}
-            onClick={() => handleSortToggle('doc')}
-            title="Sort by Date of Commencement"
+            className={`table-head-btn ${sortField === 'policyNumber' ? 'is-sorted' : ''}`}
+            onClick={() => handleSortToggle('policyNumber')}
+            title="Sort by Policy number"
             type="button"
           >
-            <span>Date of Commencement</span>
-            {renderSortIcon('doc')}
+            <span>Policy number</span>
+            {renderSortIcon('policyNumber')}
           </button>
           <button
             className={`table-head-btn ${sortField === 'submittedAt' ? 'is-sorted' : ''}`}
@@ -1475,7 +1481,7 @@ function RecordsView({
           <span className="visually-hidden">Actions</span>
         </div>
         {paginatedRecords.map((record) => {
-          const docDate = record.formData?.commencementDate || record.formData?.doc || record.commencementDate;
+          const policyNumber = getRecordPolicyNumber(record);
           const hasSubmittedDate = getDateTimestamp(record.submittedAt) !== null;
           const isChecked = selectedIds.has(record.id);
           return (
@@ -1511,8 +1517,9 @@ function RecordsView({
                 </small>
               </div>
               <div className="record-doc">
-                {docDate ? (
-                  <span>{formatDate(docDate)}</span>
+                <span className="record-mobile-label">Policy number</span>
+                {policyNumber ? (
+                  <span>{policyNumber}</span>
                 ) : (
                   <span className="record-doc-empty">Not specified</span>
                 )}
