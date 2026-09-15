@@ -406,9 +406,9 @@ function getDateTimestamp(value) {
 
 function getRecordPolicyNumber(record) {
   const policyNumber = record.policyNumber
+    || record.planNumber
+    || record.formData?.planNumber
     || record.formData?.policyNumber
-    || record.formData?.previousPolicies?.find((policy) => policy?.policyNumber)?.policyNumber
-    || record.previousPolicies?.find((policy) => policy?.policyNumber)?.policyNumber
     || '';
   return String(policyNumber).trim();
 }
