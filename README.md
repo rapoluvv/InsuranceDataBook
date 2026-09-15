@@ -4,8 +4,10 @@ React/Vite replacement for the reference `Insurance Data Form` app. The interfac
 
 ## Run locally
 
+Use Node.js 22 or newer. The Firebase Admin SDK used by the agent-role helper requires Node.js 22.
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -118,7 +120,7 @@ The project includes a one-time Admin SDK helper:
 4. Run the helper with the agent's email:
 
    ```powershell
-   npm install
+   npm ci
    npm run set-agent-role -- agent@example.com
    ```
 
@@ -149,7 +151,7 @@ For a new agent:
 ```powershell
 Set-Location "C:\path\to\Insurance Data App"
 $env:GOOGLE_APPLICATION_CREDENTIALS="C:\secure\databook-firebase-adminsdk.json"
-npm install
+npm ci
 npm run set-agent-role -- agent@example.com
 Remove-Item Env:GOOGLE_APPLICATION_CREDENTIALS
 ```
